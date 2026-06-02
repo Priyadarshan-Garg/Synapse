@@ -7,7 +7,7 @@ import cv2 as cv
 import os
 import scipy.signal
 
-from python.engine.main import Synapse
+from  .main import Synapse
 
 
 class EdgeBridge:

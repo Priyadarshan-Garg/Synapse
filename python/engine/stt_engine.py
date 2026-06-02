@@ -1,3 +1,6 @@
+"""This class is responsible for handling the speech-to-text (STT) functionality.
+It uses the Faster Whisper library to transcribe audio from the microphone."""
+
 from faster_whisper import WhisperModel
 import speech_recognition as sr
 import numpy as np
@@ -7,7 +10,7 @@ import colorama
 import os
 import sys
 
-from python.engine.event_bus import broadcast_state
+from  event_bus import broadcast_state
 
 # Colors init
 colorama.init(autoreset=True)
@@ -35,15 +38,15 @@ class STT_Engine:
 
         try:
             if not local_model_exists:
-                print(colorama.Fore.YELLOW + "⚠️ AI Models not found on this PC.")
+                print(colorama.Fore.YELLOW + "AI Models not found on this PC.")
                 print(
-                    colorama.Fore.YELLOW + "⏳ First boot detected. Downloading official models (~1.5 GB)... Please keep internet ON and do not close the app.")
+                    colorama.Fore.YELLOW + "[First boot] detected. Downloading official models (~1.5 GB)... Please keep internet ON and do not close the app.")
             else:
                 print(colorama.Fore.CYAN + "[STT] Local Whisper models found in cache. Booting offline...")
 
             start_time = time.time()
             self.model = WhisperModel(model_size, device=device, compute_type=compute_type)
-            print(colorama.Fore.GREEN + f"✅ [STT] Model loaded successfully in {time.time() - start_time:.2f} seconds")
+            print(colorama.Fore.GREEN + f"[STT] Model loaded successfully in {time.time() - start_time:.2f} seconds")
 
         except Exception as e:
             print(
@@ -58,9 +61,13 @@ class STT_Engine:
         self.recognizer.dynamic_energy_threshold = True
 
     def listen(self):
-        from python.engine.tts_engine import TTS_Engine
-        while TTS_Engine._is_speaking:
+
+        from tts_engine import TTS_Engine
+
+        # (Agar attribute nahi hua toh False maan lega, crash NAHI hoga)
+        while getattr(TTS_Engine, '_is_speaking', False):
             time.sleep(0.05)
+
         time.sleep(0.5)
 
         with sr.Microphone() as source:
@@ -74,27 +81,25 @@ class STT_Engine:
                 audio = self.recognizer.listen(source, timeout=5, phrase_time_limit=None)
                 start_time = time.perf_counter()
 
-                # Raw Audio Processing (Fastest Method)
+                # Raw Audio Processing (Fast hai)
                 raw_data = audio.get_raw_data(convert_rate=16000, convert_width=2)
                 audio_np = np.frombuffer(raw_data, dtype=np.int16).astype(np.float32) / 32768.0
 
-                # Transcribe
                 # Transcribe (Updated with Language Constraints)
                 segments, info = self.model.transcribe(
                     audio_np,
                     beam_size=5,
-                    # 1. Ye prompt model ko batata hai ki Hinglish expect kare
+
                     # initial_prompt="Priyadarshan, Trinetra, Jarvis, Ankit, Prerak,Dandotia, Hindi, English, Code, Python",
-                    # 2. Temperature 0 karne se wo creative nahi banta (Hallucination kam hoti hai)
                     temperature=0.0,
-                    # 3. Pichli baat se confuse na ho (Commands ke liye acha hai)
+                    #  Pichli baat se confuse na ho (Commands ke liye acha hai)
                     condition_on_previous_text=False
                 )
                 text = " ".join([segment.text for segment in segments])
                 hallucinations = [
                     "thank you", "thanks", "you", "watching", "subtitles",
                     "copyright", "audio", "bye", "amara", "org",
-                    "the user speaks in hinglish",  # YE HAI CULPRIT
+                    "the user speaks in hinglish",
                     "user speaks in hinglish",
                     "thank you for watching"
                 ]
@@ -102,10 +107,10 @@ class STT_Engine:
                 # (e.g., Sirf "Thank you." aaya to ignore, par "Thank you Jarvis" aaya to chalega)
                 clean_text = text.lower().replace(".", "").strip()
                 if clean_text in hallucinations:
-                    print(f"🚫 Ignored Hallucination: '{text}'")
+                    print(f"[Ignored] Hallucination: '{text}'")
                     return None, ""
                 if len(clean_text.split()) > 3 and len(set(clean_text.split())) == 1:
-                    print(f"🚫 Ignored Repetitive Loop: '{text}'")
+                    print(f"[Ignored] Repetitive Loop: '{text}'")
                     return None, ""
 
                 if "hindi" in clean_text and len(clean_text) < 10:

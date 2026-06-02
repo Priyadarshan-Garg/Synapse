@@ -1,6 +1,7 @@
+"""This class is responsible for managing the identity of the user.
+It detects when the user changes and fetches the appropriate memory.
+It also keeps a short history of what the user said (for context)."""
 import re
-
-
 class IdentityManager:
     def __init__(self, db_engine):
         self.db = db_engine
@@ -41,7 +42,7 @@ class IdentityManager:
         Switches the current user context and fetches memory.
         """
         self.current_user = new_name
-        print(f"🔄 [Identity] Context switched to: {self.current_user}")
+        print(f"[Identity] Context switched to: {self.current_user}")
 
         # DB se purani baatein nikalo
         user_data = self.db.find_user(new_name)

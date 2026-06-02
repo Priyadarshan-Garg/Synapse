@@ -1,17 +1,19 @@
-import signal
+"""This is the main file of the project.
+It initializes the necessary components and starts the main loop."""
 
+import signal
 import pyaudio
 import pygame
 
-from python.engine.assistant_state_manager import AssistantState
-from python.engine.dynamic_db_engine import DynamicDBEngine
-from python.engine.music_engine import MusicEngine
-from python.engine.reminder_engine import ReminderEngine
-from python.engine.weather_system import Wheather_Engine
-from python.engine.stt_engine import STT_Engine
-from python.engine.tts_engine import TTS_Engine
-from python.engine.llm_engine import LLM_Engine
-from python.engine.event_bus import broadcast_state, UI_STATE_QUEUE
+from  assistant_state_manager import AssistantState
+from  dynamic_db_engine import DynamicDBEngine
+from  music_engine import MusicEngine
+from  reminder_engine import ReminderEngine
+from  weather_system import Wheather_Engine
+from  stt_engine import STT_Engine
+from  tts_engine import TTS_Engine
+from  llm_engine import LLM_Engine
+from  event_bus import broadcast_state, UI_STATE_QUEUE
 
 import os
 
@@ -20,7 +22,7 @@ import numpy as np
 
 from openwakeword import Model
 
-from python.engine.vision_pro import Vision_Pro
+from  vision_pro import Vision_Pro
 import colorama
 import time
 
@@ -108,7 +110,7 @@ async def shutdown_system(background_tasks: BackgroundTasks):
 
 class Synapse:
     def __init__(self):
-        print(colorama.Fore.CYAN + f"Initializing Synapse AI Engine...")
+        print(colorama.Fore.CYAN + f"Initializing Synapse AI ..")
         self.db = DynamicDBEngine()
         self.vision = Vision_Pro()
         self.mouth = TTS_Engine()
@@ -150,7 +152,8 @@ class Synapse:
         state = AssistantState()
         while True:
             try:
-                if TTS_Engine._is_speaking:
+                # Safe check for TTS status
+                if hasattr(self.mouth, '_is_speaking') and self.mouth._is_speaking:
                     time.sleep(0.05)
                     continue
 
@@ -166,7 +169,7 @@ class Synapse:
 
                     if self.check_exit(command.lower()):
                         self.mouth.speak("Goodbye!")
-                        while TTS_Engine._is_speaking:
+                        while hasattr(self.mouth, '_is_speaking') and self.mouth._is_speaking:
                             time.sleep(0.1)
                         try:
                             self.vision.close_camera()

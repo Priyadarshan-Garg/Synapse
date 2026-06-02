@@ -1,3 +1,7 @@
+"""This class is responsible for handling the AI's responses.
+It uses the Ollama API to generate responses based on user input.
+It also handles the user's input and decides which tool to use."""
+
 import json
 import sys
 import time
@@ -10,12 +14,12 @@ import threading
 from datetime import datetime
 
 
-from python.engine.chat_manager import ChatManager
-from python.engine.dynamic_db_engine import DynamicDBEngine
-from python.engine.identity_manager import IdentityManager
-from python.engine.vision_pro import Vision_Pro
-from python.engine.music_engine import MusicEngine
-from python.engine.weather_system import Wheather_Engine
+from  chat_manager import ChatManager
+from  dynamic_db_engine import DynamicDBEngine
+from  identity_manager import IdentityManager
+from  vision_pro import Vision_Pro
+from  music_engine import MusicEngine
+from  weather_system import Wheather_Engine
 
 
 class LLM_Engine:
@@ -49,18 +53,18 @@ class LLM_Engine:
             start_time = time.time()
             models_response = ollama.list()
 
-            # --- OLLAMA API UPDATE FIX ---
+            # OLLAMA API
             existing_models = []
             if hasattr(models_response, 'models'):  # Agar naya ollama package hai (Object based)
                 existing_models = [getattr(m, 'model', getattr(m, 'name', '')) for m in models_response.models]
             else:  # Agar purana ollama package hai (Dict based)
                 existing_models = [m.get('model', m.get('name', '')) for m in models_response.get('models', [])]
-            # -----------------------------
+
 
             if self.model_name not in existing_models:
-                print(colorama.Fore.YELLOW + f"⚠️ AI Brain '{self.model_name}' not found locally.")
+                print(colorama.Fore.YELLOW + f"AI Brain '{self.model_name}' not found locally.")
                 print(
-                    colorama.Fore.YELLOW + "⏳ First boot detected. Downloading language model (~1.9 GB)... Please do not close.")
+                    colorama.Fore.YELLOW + " [First boot] detected. Downloading language model (~1.9 GB)... Please do not close.")
                 for progress in ollama.pull(self.model_name, stream=True):
                     status = progress.get('status', '')
                     completed = progress.get('completed', 0)
@@ -70,13 +74,13 @@ class LLM_Engine:
                         print(f"\rDownloading: {status} - {percent:.1f}%", end="", flush=True)
                     else:
                         print(f"\rProcessing: {status}...", end="", flush=True)
-                print(colorama.Fore.GREEN + f"\n✅ [LLM] Model '{self.model_name}' downloaded successfully")
+                print(colorama.Fore.GREEN + f"\n [LLM] Model '{self.model_name}' downloaded successfully")
             else:
                 print(colorama.Fore.CYAN + f"[LLM] Local brain '{self.model_name}' found.")
 
         except Exception as e:
-            print(colorama.Fore.RED + "\n❌ [Fatal Error] Failed to connect to Ollama backend")
-            print(colorama.Fore.RED + "❌ Please make sure Ollama is installed and running on background")
+            print(colorama.Fore.RED + "\n [Fatal Error] Failed to connect to Ollama backend")
+            print(colorama.Fore.RED + "Please make sure Ollama is installed and running on background")
             print(colorama.Fore.RED + f"Error details: {e}")
             import sys
             sys.exit(1)
@@ -356,7 +360,7 @@ class LLM_Engine:
         detected_names = self.vision.scan_scene()
 
         if not detected_names or detected_names == ["Camera Error"]:
-            self.current_user = "None"  # ✅ Reset karo
+            self.current_user = "None"  # Reset
             return "none"
 
         known_faces = [n for n in detected_names
@@ -403,10 +407,10 @@ class LLM_Engine:
         Returns: Generated Response
 
         """
-        # 1. Update history
+        #  Update history
         self.history.append({"role": "user", "content": user_input})
 
-        # 2. Get Response
+        #  Get Response
         try:
             response = ollama.chat(model='qwen2.5:3b-instruct', messages=self.history)
             reply = response['message']['content']
@@ -414,12 +418,11 @@ class LLM_Engine:
             print(f"Chat Gen Error: {e}")
             reply = "I'm having trouble thinking right now. I think the LLM is not responding."
 
-        # 3. Save to history
+        #  Save to history
         self.history.append({"role": "assistant", "content": reply})
         self.chat_db.add_message(self.current_session_id, "user", user_input)
         self.chat_db.add_message(self.current_session_id, "assistant", reply)
 
-        # 4. Background Fact Extraction
 
         # Token per second report it uses internal clock
         eval_count = response.get('eval_count', 0)
@@ -484,3 +487,12 @@ class LLM_Engine:
                 print(colorama.Fore.GREEN + f"💾 Memory Updated for {user_name}: {fact}")
         except:
             pass
+
+    def process_name_info(self, text):
+        """
+        Wrapper around extract_parameters to prevent AttributeError from main.py
+        """
+        result = self.extract_parameters(text)
+        if result:
+            return result
+        return {"name": text, "info": ""}

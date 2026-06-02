@@ -1,3 +1,6 @@
+"""This class is responsible for fetching weather data from an external API.
+It uses the OpenWeatherMap API to retrieve current weather conditions for a given city."""
+
 import os
 import json
 import sys
@@ -10,13 +13,13 @@ class Wheather_Engine:
         self.BASE_DIR = os.path.join(user_home, ".naina_ai")
         os.makedirs(self.BASE_DIR, exist_ok=True)
         self.config_file = os.path.join(self.BASE_DIR, "config.json")
-        
+
         self.api_key = self._get_api_key()
         self.base_url = "http://api.openweathermap.org/data/2.5/weather"
 
     def _get_api_key(self):
         # Default key (If you want to keep yours, otherwise replace with empty string "")
-        default_key = "7c880ab8a64eddb3de89b7e500536d9c"
+        default_key = "api_key"
         
         if os.path.exists(self.config_file):
             try:
@@ -45,10 +48,11 @@ class Wheather_Engine:
             'lang': 'en'       # -> Language english
         }
         
-        print(f"\n🔍 Fetching weather data for: {city}...")
+        print(f"\n [Fetching] weather data for: {city}...")
         
         try:
-            response = requests.get(self.base_url, params=params) # -> Servers se data le rhe hain,Json format mein
+            # 5 second ka timeout laga diya. Agar internet nahi chala, to turant error dega aur app hang nahi hogi.
+            response = requests.get(self.base_url, params=params, timeout=5) # -> Servers se data le rhe hain,Json format mein
             data = response.json()
 
             if data["cod"] == 200:
@@ -71,20 +75,20 @@ class Wheather_Engine:
                 print(f"[Wind Speed] : {wind_speed} m/s")
                 
                 if rain > 0:
-                    print(f"🌧️  Precipitation (last 1h): {rain} mm")
+                    print(f"[Precipitation] (last 1h): {rain} mm")
                 else:
-                    print(f"☀️  Precipitation: No rain reported.")
+                    print(f"[Precipitation]: No rain reported.")
                 print("-" * 30)
                 
                 # **ADD THIS RETURN STATEMENT:**
                 return f"Temperature: {temp}°C, Condition: {desc.title()}, Humidity: {humidity}%, Wind: {wind_speed} m/s"
                 
             else:
-                print(f"❌ Error: {data['message']}")
-                return f"Weather data not available for {city}. Error: {data['message']}"
+                print(f"[Error]: {data['message']}")
+                return f"[Unavailable] : Weather data not available for {city}. Error: {data['message']}"
                 
         except Exception as e:
-            print(f"❌ Something went wrong: {e}")
+            print(f"Something went wrong: {e}")
             return f"Failed to get weather data for {city}. Error: {e}"
 
 # -> User se input leke weather check karenge

@@ -1,3 +1,7 @@
+"""This class is responsible for handling to
+vision queries and maintaining the active context by checking who
+is the current user in front of NAINA"""
+
 import threading
 import cv2
 import numpy as np
@@ -27,7 +31,7 @@ class Vision_Pro:
         if not os.path.exists(model_path):
             print(colorama.Fore.YELLOW + "Face Recognition models not found locally.")
             print(
-                colorama.Fore.YELLOW + "First boot detected. Downloading Vision models (~330 MB)... Please keep internet ON and do not close.")
+                colorama.Fore.YELLOW + "[First boot] detected. Downloading Vision models (~330 MB)... Please keep internet ON and do not close.")
         else:
             print(colorama.Fore.CYAN + "[Vision] Local models found. Booting offline...")
 
@@ -46,12 +50,11 @@ class Vision_Pro:
                 colorama.Fore.RED + "[Fatal Error] Failed to load or download Vision models. Please check your internet connection!")
             print(colorama.Fore.RED + f"Error Details: {e}")
 
-        if getattr(sys, 'frozen', False):
-            BASE_DIR = os.path.dirname(sys.executable)
-        else:
-            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-        db_path = os.path.join(BASE_DIR, 'vision_pro.db')
+        # Production ready: Store data in user's home directory so it's not read-only
+        naina_ai_dir = os.path.join(user_home, ".naina_ai")
+        os.makedirs(naina_ai_dir, exist_ok=True)
+        
+        db_path = os.path.join(naina_ai_dir, 'vision_pro.db')
         self.conn = sqlite3.connect(db_path, check_same_thread=False)
         self.cursor = self.conn.cursor()
 
@@ -151,7 +154,7 @@ class Vision_Pro:
 
         if new_count > 0:
             self.conn.commit()
-            print(colorama.Fore.GREEN + f" Imported {new_count} new faces from folder!")
+            print(colorama.Fore.GREEN + f"[Imported] {new_count} new faces from folder!")
         else:
             print("Folder check complete. No new valid images found.")
 
@@ -211,12 +214,9 @@ class Vision_Pro:
                 time.sleep(wait_for_user_seconds)
 
         import os
-        if getattr(sys, 'frozen', False):
-            BASE_DIR = os.path.dirname(sys.executable)
-        else:
-            BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-        folder_path = os.path.join(BASE_DIR, "registered_faces")
+        user_home = os.path.expanduser("~")
+        naina_ai_dir = os.path.join(user_home, ".naina_ai")
+        folder_path = os.path.join(naina_ai_dir, "registered_faces")
 
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
@@ -379,8 +379,32 @@ class Vision_Pro:
         except Exception:
             return None
 
+    def update_person_info(self, name, new_info_dict):
+        """Updates the info for an existing person in the database"""
+        try:
+            info_json = json.dumps(new_info_dict)
+            # Update all entries for this person (front, left, right, smile)
+            self.cursor.execute("UPDATE humans SET info = ? WHERE name = ?", (info_json, name))
+            self.conn.commit()
+
+            # Reload RAM to reflect changes immediately
+            self.load_memory()
+            print(colorama.Fore.GREEN + f"[Vision] Updated info for {name}")
+            return True
+        except Exception as e:
+            print(colorama.Fore.RED + f"[Vision] DB Update Error: {e}")
+            return False
+
     def check_person_exists(self, final_name):
-        pass
+        """Checks if a person is already in the database"""
+        try:
+            self.cursor.execute("SELECT info FROM humans WHERE name = ? LIMIT 1", (final_name,))
+            row = self.cursor.fetchone()
+            if row:
+                return json.loads(row[0])
+            return None
+        except Exception:
+            return None
 
 if __name__ == "__main__":
     v = Vision_Pro()

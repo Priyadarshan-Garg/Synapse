@@ -18,7 +18,14 @@ Synapse is the robust, multi-threaded distributed architecture built from scratc
 
 Unlike standard API wrappers, Synapse solves the heavy-compute problem of modern LLMs and vision models by splitting the workload: a **Raspberry Pi 3** acts as the sensory edge device (mouth, eyes and ears) written purely in raw poer (C++), while a powerful **Local PC** acts as the brain (inference server) fully leveraging **NVIDIA CUDA** for parallel GPU computing.
 
+
 <img src="https://cdn.pixabay.com/photo/2024/04/08/19/56/neural-network-8684318_1280.jpg">
+
+
+## Demo Video
+
+[![Watch Synapse Demo](https://img.youtube.com/vi/U6jmOxHk3mE/maxresdefault.jpg)](https://www.youtube.com/watch?v=U6jmOxHk3mE)
+
 
 ## High Level Design 
 
@@ -63,8 +70,6 @@ The system is strictly divided into two independent nodes communicating over a L
 * **ZeroMQ (ZMQ):** Used for asynchronous, high-throughput, low-latency Inter-Process Communication (IPC) and network socket streaming between the C++ client and Python server.
 * **Bash/Shell Scripting:** The entire startup sequence, network binding, environment variable management, and process daemonization on both the RPi and the server are heavily automated using pipelines of processing.
 
-## Demo
-* Dropping soon
 
 ## The Developer Diaries: Building Synapse
 

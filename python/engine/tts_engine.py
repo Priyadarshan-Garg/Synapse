@@ -1,3 +1,4 @@
+
 import threading
 
 import colorama
@@ -12,10 +13,9 @@ import time
 import numpy as np
 import queue
 import re
-from python.engine.event_bus import broadcast_state
+from  event_bus import broadcast_state
 
 
-# MONKEY PATCH (Standard Fix)
 if not hasattr(np, "original_load"):
     np.original_load = np.load
 
@@ -41,18 +41,18 @@ class TTS_Engine:
         if not pygame.mixer.get_init():
             pygame.mixer.init()
 
-        # Step 1: Model check karo, agar nahi hai toh download (With absolute paths)
+        #  Model check karo, agar nahi hai toh download (With absolute paths)
         model_path, voices_path = self._ensure_models_exist()
 
-        # Step 2: Initialize Kokoro with Dynamic Paths
+        # Initialize Kokoro with Dynamic Paths
         if TTS_Engine._kokoro is None:
             try:
                 start_time = time.time()
                 TTS_Engine._kokoro = Kokoro(model_path, voices_path)
                 print(
-                    colorama.Fore.GREEN + f"✅ [TTS] Voice Engine Loaded Successfully in {time.time() - start_time:.2f} seconds.")
+                    colorama.Fore.GREEN + f"[TTS] Voice Engine Loaded Successfully in {time.time() - start_time:.2f} seconds.")
             except Exception as e:
-                print(colorama.Fore.RED + f"❌ [Fatal Error] Failed to load TTS models: {e}")
+                print(colorama.Fore.RED + f"[Fatal Error] Failed to load TTS models: {e}")
                 import sys
                 sys.exit(1)
 
@@ -76,9 +76,9 @@ class TTS_Engine:
         if not os.path.exists(voices_path): missing_files.append((files[1], voices_path))
 
         if missing_files:
-            print(colorama.Fore.YELLOW + "⚠️ Voice Models (TTS) not found locally.")
+            print(colorama.Fore.YELLOW + "Voice Models (TTS) not found locally.")
             print(
-                colorama.Fore.YELLOW + "⏳ First boot detected. Downloading Voice models (~100 MB)... Please keep internet ON.")
+                colorama.Fore.YELLOW + "[First boot] detected. Downloading Voice models (~100 MB)... Please keep internet ON.")
 
             # Live Progress Bar Generator Hook
             def progress_hook(count, block_size, total_size):
@@ -90,10 +90,10 @@ class TTS_Engine:
                 print(colorama.Fore.CYAN + f"\nFetching {file_name}...")
                 try:
                     urllib.request.urlretrieve(base_url + file_name, save_path, reporthook=progress_hook)
-                    print(colorama.Fore.GREEN + f"\n✅ {file_name} downloaded securely.")
+                    print(colorama.Fore.GREEN + f"\n {file_name} downloaded securely.")
                 except Exception as e:
-                    print(colorama.Fore.RED + f"\n❌ Failed to download {file_name}. Internet issue?")
-                    print(colorama.Fore.RED + f"Error details: {e}")
+                    print(colorama.Fore.RED + f"\n [Failed] to download {file_name}. Internet issue?")
+                    print(colorama.Fore.RED + f"[Error] details: {e}")
                     import sys
                     sys.exit(1)
 
@@ -181,7 +181,7 @@ class TTS_Engine:
             audio_data, text_segment = packet
 
             if first_chunk:
-                print(f"🚀 Streaming Started! (First Byte: {(time.perf_counter() - start_time) * 1000:.0f}ms)")
+                print(f"[Streaming Started] (First Byte: {(time.perf_counter() - start_time) * 1000:.0f}ms)")
                 first_chunk = False
 
             try:
@@ -210,9 +210,9 @@ class TTS_Engine:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((TARGET_IP, TARGET_PORT))
-            print("🔗 Connected to C++ Audio Server!")
+            print("[Connected] to C++ Audio Server!")
         except Exception as e:
-            print(f"❌ Failed to connect to C++ Audio Server: {e}")
+            print(f"[Failed] to connect to C++ Audio Server: {e}")
             return
 
         while True:
@@ -222,14 +222,14 @@ class TTS_Engine:
             raw_audio_bytes, text_segment = packet
 
             if first_chunk:
-                print(f"🚀 Streaming to C++ Started! (First Byte: {(time.perf_counter() - start_time) * 1000:.0f}ms)")
+                print(f"[Streaming] to C++ Started! (First Byte: {(time.perf_counter() - start_time) * 1000:.0f}ms)")
                 first_chunk = False
 
             try:
-                print(f"🤖 Sending to C++: '{text_segment}'")
+                print(f"[Sending] to C++: '{text_segment}'")
                 s.sendall(raw_audio_bytes)
             except Exception as e:
-                print(f"Network Send Error: {e}")
+                print(f"[Error] in Network: {e}")
                 break
 
         s.close()

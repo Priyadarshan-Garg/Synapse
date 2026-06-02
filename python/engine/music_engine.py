@@ -1,4 +1,7 @@
-import vlc  # Replaces pygame
+"""This class is responsible for playing and pausing the music
+ based on a user's mood or desire."""
+
+import vlc  # better than pygame for streaming
 import yt_dlp
 import time
 from ytmusicapi import YTMusic  # For accurate song search
@@ -41,12 +44,12 @@ class MusicEngine:
             print(f"🎵 Found: {title} by {artist}")
             print("⚡ Fetching Stream URL (No Download)...")
 
-            # EXTRACT URL: yt-dlp se direct stream URL nikalenge
+            # yt-dlp se direct stream URL nikalenge
             ydl_opts = {
                 'format': 'bestaudio/best',
                 'quiet': True,
                 'no_warnings': True,
-                # FOR 403 FORBIDDEN ERROR FIX
+
                 'extractor_args': {
                     'youtube': {
                         'player_client': ['android', 'web'],
@@ -109,10 +112,10 @@ class MusicEngine:
         vlc_vol = int(self._volume * 100)
         self.player.audio_set_volume(vlc_vol)
 
-
     def check_status(self):
-        # VLC returns 1 if playing, 0 if not
-        return self.player.is_playing() == 1
+        # VLC returns State.Playing or State.Buffering when active
+        state = self.player.get_state()
+        return state in [vlc.State.Playing, vlc.State.Buffering]
 
     def duck_volume(self):
         """Lowers the music volume to 10%"""
@@ -129,7 +132,6 @@ if __name__ == "__main__":
     music = MusicEngine()
     music.play("Arjan Vailly")
 
-    # 🔥 YE LINE MISSING THI (Abhi bhi zaroori hai testing ke liye):
     print("Code khatam hone se rok raha hu...")
 
     try:

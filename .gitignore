@@ -29,7 +29,7 @@ python/synapse_env/
 *.pyo
 *.pyd
 
-
+.env
 
 # tsx wali
 frontend/visualizer-app/.next

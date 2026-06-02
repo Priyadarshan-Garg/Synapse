@@ -1,3 +1,6 @@
+"""This class is responsible for managing the dynamic database.
+It provides methods to add, update, and retrieve information from the database."""
+
 import os
 import sys
 import chromadb
@@ -87,13 +90,13 @@ class DynamicDBEngine:
         print(f"[DB Search] Query: '{clean_query}'")
 
         try:
-            # Step 1: Pehle Exact ID Match try karo (Fastest)
+            # Pehle Exact ID Match try karo (Fastest)
             exact_match = self.collection.get(ids=[clean_query])
             if exact_match and exact_match['documents']:
                 print(f"[DB] Found via Exact ID Match: {clean_query}")
                 return f"Name: {clean_query}, Info: {exact_match['documents'][0]}"
 
-            # Step 2: Agar Exact nahi mila, to Vector Search (Semantic)
+            # Agar Exact nahi mila, to Vector Search (Semantic)
             print(f"[DB] Trying Vector Search for: '{clean_query}'")
             results = self.collection.query(
                 query_texts=[clean_query],

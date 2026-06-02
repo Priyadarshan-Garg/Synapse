@@ -20,7 +20,6 @@ class ChatManager:
         self.create_tables()
 
     def create_tables(self):
-        # 1. Sessions Table (Chat Threads like 'New Chat 1', 'Python Help', etc.)
         self.cursor.execute("""
                             CREATE TABLE IF NOT EXISTS sessions
                             (
@@ -37,7 +36,7 @@ class ChatManager:
                             )
                             """)
 
-        # 2. Messages Table (Actual conversations)
+
         self.cursor.execute("""
                             CREATE TABLE IF NOT EXISTS messages
                             (
@@ -94,11 +93,11 @@ class ChatManager:
                             """, (session_id,))
 
         rows = self.cursor.fetchall()
-        # OpenAI format me convert karo
+        # OpenAI format me converter
         history = [{"role": row[0], "content": row[1]} for row in rows]
         return history
 
-    #  Chat ki List Dekhna (Sidebar ke liye) 
+    # Although it's currently not useful may be we could use in further versions
     def get_all_sessions(self):
         self.cursor.execute("SELECT session_id, title, created_at FROM sessions ORDER BY created_at DESC")
         return self.cursor.fetchall()

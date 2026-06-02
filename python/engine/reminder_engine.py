@@ -1,3 +1,7 @@
+"""This class is responsible for managing reminders.
+It uses the APScheduler library to schedule tasks and save them to a JSON file.
+It also provides methods to add, cancel, and retrieve reminders."""
+
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 import colorama
@@ -5,7 +9,7 @@ import json
 import os
 import sys
 
-# Production ready: Store data in user's home directory so it's not read-only
+
 user_home = os.path.expanduser("~")
 BASE_DIR = os.path.join(user_home, ".naina_ai")
 os.makedirs(BASE_DIR, exist_ok=True)
@@ -39,21 +43,20 @@ class ReminderEngine:
 
     def _load_from_file(self):
         if not os.path.exists(REMINDERS_FILE):
-            print(f"[Reminder] File nahi mili: {REMINDERS_FILE}")
+            print(f"[Reminder] File not found: {REMINDERS_FILE}")
             return
 
         try:
             with open(REMINDERS_FILE, "r") as f:
                 data = json.load(f)
 
-            print(f"[Reminder] {len(data)} reminders file mein mili")
+            print(f"[Reminder] {len(data)} found in file.")
             now = datetime.now()
             loaded = 0
 
             for item in data:
                 run_date = datetime.fromisoformat(item["run_date"])
 
-                # FIX: Timezone strip karo — naive datetime banao
                 run_date = run_date.replace(tzinfo=None)
 
                 if run_date < now:
