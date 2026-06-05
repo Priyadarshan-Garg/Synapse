@@ -1,3 +1,4 @@
+
 # SYNAPSE: Distributed Edge-Cloud AI Assistant Architecture
 **Powering *Naina* | Built from Scratch with Linux Environments**
 
@@ -22,10 +23,10 @@ Unlike standard API wrappers, Synapse solves the heavy-compute problem of modern
 <img src="https://cdn.pixabay.com/photo/2024/04/08/19/56/neural-network-8684318_1280.jpg">
 
 
-## Demo Video
+## Demo Video 
 
-[![Watch Synapse Demo](https://img.youtube.com/vi/U6jmOxHk3mE/maxresdefault.jpg)](https://www.youtube.com/watch?v=U6jmOxHk3mE)
-
+ [![Watch Synapse Demo](https://img.youtube.com/vi/U6jmOxHk3mE/maxresdefault.jpg)](https://www.youtube.com/watch?v=U6jmOxHk3mE)
+ 
 
 ## High Level Design 
 
@@ -134,8 +135,7 @@ While software processing is highly optimized, real-world physical latency inclu
 ## 🛣️ Roadmap
 
 - [x] Publish comprehensive latency and resource utilization metrics (RPi CPU vs. PC GPU/VRAM).
-- [ ] Make a Docker file to run this AI in a local environment, so you don't go through dependency hell.
-- [ ] Intensively documenting every file.
+- [x] Intensively documenting every file.
 - [x] Make a script/bat file for running as background service.
 
 ---
