@@ -25,8 +25,15 @@ Unlike standard API wrappers, Synapse solves the heavy-compute problem of modern
 
 ## Demo Video 
 
- [![Watch Synapse Demo](https://img.youtube.com/vi/U6jmOxHk3mE/maxresdefault.jpg)](https://www.youtube.com/watch?v=U6jmOxHk3mE)
- 
+ <!--[![Watch Synapse Demo](https://img.youtube.com/vi/U6jmOxHk3mE/maxresdefault.jpg)](https://www.youtube.com/watch?v=U6jmOxHk3mE)
+ -->
+ <a href="https://www.youtube.com/watch?v=U6jmOxHk3mE">
+  <img src="https://img.youtube.com/vi/U6jmOxHk3mE/maxresdefault.jpg" width="600"/>
+</a>
+
+---
+
+## [Please Like ❤️ our LinkedIn Post](https://www.linkedin.com/posts/priyadarshan-garg_ai-machinelearning-python-ugcPost-7468868562963660800-WtnN/?utm_source=share&utm_medium=member_desktop&rcm=ACoAADknqH4B93eUcg0LSmF3O8d7n06dWWbz5VY) 
 
 ## High Level Design 
 
